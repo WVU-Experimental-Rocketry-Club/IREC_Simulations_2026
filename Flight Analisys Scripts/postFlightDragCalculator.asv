@@ -191,9 +191,9 @@ if isempty(coastIdx) || length(coastIdx) < 10
 end
 
 fprintf('Flight Phase Identification Complete:\n');
-fprintf(' - Motor Burnout at %.2f seconds (Max Velocity)\n', motorBurnTime);
+fprintf(' - Motor Burnout at %.2f seconds (Max Velocity)\n', burnoutTime);
 fprintf(' - Apogee at %.2f seconds (Max Altitude)\n', apogeeTime);
-fprintf(' - Coast analysis ends at %.2f seconds (%.2fs before apogee).\n', coastEndTime, coast_end_early);
+fprintf(' - Coast analysis ends at %.2f seconds (%.2fs seconds before apogee).\n', coastEndTime, coast_end_early);
 
 %% --- Data Processing and Cd Calculation ---
 
@@ -225,11 +225,9 @@ for i = 1:length(time_coast)
     % Get instantaneous values
     h = alt_coast(i);
     v = vel_coast(i);
-    a = accel_coast(i); % Use the smoothed accelerometer value
-    
+    a = accel_coast_smoothed(i); % Use the smoothed accelerometer value
+    p = pressure_coast(i);
 
-    balloonIndex = find(balloonAltitude >= h, 1, "first"); %finds the location where the balloon data lines up with rocket data
-    p = balloonPressure(balloonIndex) * 100;
     % Avoid calculations when velocity is near zero (at apogee) to prevent
     % division by zero and nonsensical Cd values.
     if v < 10 % m/s threshold
@@ -241,8 +239,8 @@ for i = 1:length(time_coast)
     % We use the accurate ONBOARD PRESSURE sensor data, but calculate
     % TEMPERATURE using the International Standard Atmosphere (ISA) model
     % as onboard temperature sensors can be unreliable.
-    %T_k = calculate_isa_temperature(h); % Calculate temp from altitude
-    T_k = balloonTemperature(balloonIndex) + 273.15;
+    T_k = calculate_isa_temperature(h); % Calculate temp from altitude
+    %T_k = 313;
     rho = p / (R * T_k); % Calculate density using Ideal Gas Law (P = rho*R*T)
     speed_of_sound = sqrt(gamma * R * T_k);
     
