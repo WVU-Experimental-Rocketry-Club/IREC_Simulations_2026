@@ -225,7 +225,7 @@ for i = 1:length(time_coast)
     % Get instantaneous values
     h = alt_coast(i);
     v = vel_coast(i);
-    a = accel_coast(i); % Use the smoothed accelerometer value
+    a = accel_coast_smoothed(i); % Use the smoothed accelerometer value
     
 
     balloonIndex = find(balloonAltitude >= h, 1, "first"); %finds the location where the balloon data lines up with rocket data
@@ -253,7 +253,7 @@ for i = 1:length(time_coast)
     % Therefore, F_drag = m * a_proper.
     % Since drag opposes motion (v is positive, a is negative), the
     % magnitude of the drag force is -m*a.
-    F_drag = -m * (a);
+    F_drag = (-m * (a));
     DragForce = [DragForce; F_drag / 4.448]; % not plotted, just saved as drag force in lbf
     % We only care about positive drag force values
     if F_drag <= 0
