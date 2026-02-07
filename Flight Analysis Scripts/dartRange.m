@@ -1,10 +1,10 @@
-P_TX = 27; %tx power. 100mw = 20, 400mw=26, 500mw = 27, 1w = 30 dBm, 2w = 33 dBm
+P_TX = 26; %tx power. 100mw = 20, 400mw=26, 500mw = 27, 1w = 30 dBm, 2w = 33 dBm
 TX_efficiency = 0.95;
-G_TX = 2.8; %tx gain (9.3 dbi triple feed, hpbw 55 deg 6.3 dbi)
-G_RX = 2.8; % rx gain (5.8 dbi mx air, 11 dbi maple, 
+G_TX = 5; %tx gain (9.3 dbi triple feed, hpbw 55 deg 6.3 dbi)
+G_RX = 10; % rx gain (5.8 dbi mx air, 11 dbi maple, 
 S_RX = -90; %sensitivity dBm
 
-f_MHz = 5800; % freq mhz
+f_MHz = 2390; % freq mhz
 LM = 3; %link margin
 
 

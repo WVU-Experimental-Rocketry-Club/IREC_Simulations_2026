@@ -42,33 +42,58 @@ fprintf('Starting Rocket Drag Coefficient Analysis...\n');
 
 %% --- User Inputs ---
 
-% Step 1: Get the data file from the user
-[fileName, pathName] = uigetfile('*.csv', 'Select the TeleMega CSV Data File');
-if isequal(fileName, 0)
-    disp('User selected Cancel. Exiting script.');
-    return;
-end
-fullFilePath = fullfile(pathName, fileName);
-fprintf('Loading data from: %s\n', fullFilePath);
+% Step 1: Get the data files from the user
 
-[fileNameBalloon, pathNameBalloon] = uigetfile('*.csv', 'Select the Weather Balloon CSV Data File');
-if isequal(fileNameBalloon, 0)
-    disp('User selected Cancel. Exiting script.');
-    return;
-end
-balloonFilePath = fullfile(pathNameBalloon, fileNameBalloon);
-fprintf('Loading data from: %s\n', balloonFilePath);
+% telemega
+% [fileName, pathName] = uigetfile('*.csv', 'Select the TeleMega CSV Data File');
+% if isequal(fileName, 0)
+%     disp('User selected Cancel. Exiting script.');
+%     return;
+% end
+% fullFilePath = fullfile(pathName, fileName);
+% fprintf('Loading data from: %s\n', fullFilePath);
+% 
+% % weather balloon
+% [fileNameBalloon, pathNameBalloon] = uigetfile('*.csv', 'Select the Weather Balloon CSV Data File');
+% if isequal(fileNameBalloon, 0)
+%     disp('User selected Cancel. Exiting script.');
+%     return;
+% end
+% balloonFilePath = fullfile(pathNameBalloon, fileNameBalloon);
+% fprintf('Loading data from: %s\n', balloonFilePath);
+% 
+% % featherweight GPS
+% [fileNameFWGPS, pathNameFWGPS] = uigetfile('*.csv', 'Select the Featherweight GPS CSV Data File');
+% if isequal(fileNameFWGPS, 0)
+%     disp('User selected Cancel. Exiting script.');
+%     return;
+% end
+% FWGPS_FilePath = fullfile(pathNameFWGPS, fileNameFWGPS);
+% fprintf('Loading data from: %s\n', FWGPS_FilePath);
+% 
+% % featherweight BR Low Rate
+% [fileNameBRLR, pathNameBRLR] = uigetfile('*.csv', 'Select the Featherweight Blue Raven Low Rate CSV Data File');
+% if isequal(fileNameBRLR, 0)
+%     disp('User selected Cancel. Exiting script.');
+%     return;
+% end
+% BRLR_FilePath = fullfile(pathNameBRLR, fileNameBRLR);
+% fprintf('Loading data from: %s\n', BRLR_FilePath);
+% 
+% % featherweight BR Low Rate
+% [fileNameBRHR, pathNameBRHR] = uigetfile('*.csv', 'Select the Featherweight Blue Raven High Rate CSV Data File');
+% if isequal(fileNameBRHR, 0)
+%     disp('User selected Cancel. Exiting script.');
+%     return;
+% end
+% BRHR_FilePath = fullfile(pathNameBRLR, fileNameBRLR);
+% fprintf('Loading data from: %s\n', BRHR_FilePath);
 
-% Step 2: Ask user for the units of the data in the CSV file
-unit_choice = questdlg('Are the units in the CSV file in Meters or Feet?', ...
-    'Select Data Units', ...
-    'Meters (m, m/s, m/s^2)', 'Feet (ft, ft/s, ft/s^2)', 'Meters (m, m/s, m/s^2)');
-
-unit_conversion_factor = 1.0; % Default to meters
-if strcmp(unit_choice, 'Feet (ft, ft/s, ft/s^2)')
-    unit_conversion_factor = 0.3048; % Conversion factor from feet to meters
-    fprintf('Data will be converted from Feet to Meters for analysis.\n');
-end
+fullFilePath = 'C:\Users\Rex\Documents\Rocketry\IREC 2026 - Unnamed Project\Simulations\IREC_Simulations_2026\Flight Analysis Scripts\Old Flight Data\sSunset_telemega_06112025.csv';
+balloonFilePath = 'C:\Users\Rex\Documents\Rocketry\IREC 2026 - Unnamed Project\Simulations\IREC_Simulations_2026\Flight Analysis Scripts\Balloon Data\Midland\2025061112-72265.csv';
+FWGPS_FilePath = 'C:\Users\Rex\Documents\Rocketry\IREC 2026 - Unnamed Project\Simulations\IREC_Simulations_2026\Flight Analysis Scripts\Old Flight Data\WVU410     _06-11-2025_18_42_19.csv';
+BRLR_FilePath = 'C:\Users\Rex\Documents\Rocketry\IREC 2026 - Unnamed Project\Simulations\IREC_Simulations_2026\Flight Analysis Scripts\Old Flight Data\IREC Blue Raven\BlRv_wvuer1 LR_11-05-2024_18_22_39.csv';
+BRHR_FilePath = 'C:\Users\Rex\Documents\Rocketry\IREC 2026 - Unnamed Project\Simulations\IREC_Simulations_2026\Flight Analysis Scripts\Old Flight Data\IREC Blue Raven\BlRv_wvuer1 HR_11-05-2024_18_22_39.csv';
 
 % Step 3: Get rocket parameters from the user via a dialog box
 prompt = {'Enter Coast Mass (kg):', 'Enter Rocket Diameter (m):'};
@@ -87,20 +112,21 @@ m = str2double(answer{1}); % Rocket coast mass in kg
 d = str2double(answer{2}); % Rocket diameter in m
 A = pi * (d/2)^2;          % Cross-sectional area in m^2
 
-% --- ADVANCED PARAMETER ---
+% --- Burn Window ---
 % Delay after max velocity before starting coast analysis (seconds).
 % This helps to avoid the "thrust tailing" phase of the motor burn,
 % where residual thrust can make the calculated Cd artificially low.
 prompt = {'Enter Motor Burn time (s):', 'Enter Coast Early End Amount (s):'};
 dlgtitle = 'Analysis Time Window';
 dims = [1 50];
-definput = {'9.25', '3'};
+definput = {'10.15', '3'};
 answer = inputdlg(prompt, dlgtitle, dims, definput);
 
 if isempty(answer)
     disp('User selected Cancel. Exiting script.');
     return;
 end
+
 motorBurnTime = str2double(answer{1}); 
 coast_end_early = str2double(answer{2}); % how many seconds to remove before apogee to eliminate unusable data
 
@@ -111,23 +137,40 @@ coast_end_early = str2double(answer{2}); % how many seconds to remove before apo
 try
     telemegaData = readtable(fullFilePath);
     balloonData = readtable(balloonFilePath);
+    fwgpsData = readtable(FWGPS_FilePath, "Delimiter",",");
+    brlrData = readtable(BRLR_FilePath);
+    brhrData = readtable(BRHR_FilePath);
     
     % Find all required columns. The script will now look for pressure
     % and temperature to calculate air density directly from flight data.
     timeVar = find(strcmpi(telemegaData.Properties.VariableNames, 'time'));
-    altVar = find(strcmpi(telemegaData.Properties.VariableNames, 'altitude_gps'));
+    altVar = find(strcmpi(telemegaData.Properties.VariableNames, 'altitude'));
     velVar = find(strcmpi(telemegaData.Properties.VariableNames, 'speed'));
     accelVar = find(strcmpi(telemegaData.Properties.VariableNames, 'accel_x')); % Prioritize accel_x
     pressureVar = find(contains(telemegaData.Properties.VariableNames, 'pressure', 'IgnoreCase', true), 1);
     tempVar = find(contains(telemegaData.Properties.VariableNames, 'Temperature', 'IgnoreCase', true), 1);
 
-    balloonHeight_m = find(strcmpi(balloonData.Properties.VariableNames, "geopotentialHeight_m"));
-    balloonPressure_hPa = find(strcmpi(balloonData.Properties.VariableNames, 'pressure_hPa'));
-    balloonTemp_C = find(strcmpi(balloonData.Properties.VariableNames, 'temperature_C'));
+    balloonHeight_m_var = find(strcmpi(balloonData.Properties.VariableNames, "geopotentialHeight_m"));
+    balloonPressure_hPa_var = find(strcmpi(balloonData.Properties.VariableNames, 'pressure_hPa'));
+    balloonTemp_C_var = find(strcmpi(balloonData.Properties.VariableNames, 'temperature_C'));
+
+    fwgpsALT_Var = find(strcmpi(fwgpsData.Properties.VariableNames, "ALT"));
+    fwgpsHORZV_Var = find(strcmpi(fwgpsData.Properties.VariableNames, "HORZV"));
+    fwgpsVERTV_Var = find(strcmpi(fwgpsData.Properties.VariableNames, "VERTV"));
+
+    brlr_time_var = find(strcmpi(brlrData.Properties.VariableNames, "Flight_Time__s_"));
+    brlr_alt_var = find(strcmpi(brlrData.Properties.VariableNames, "Baro_Altitude_ASL__feet_"));
+
+    brlr_velup_var = find(strcmpi(brlrData.Properties.VariableNames, "Velocity_Up"));
+    brlr_veldr_var = find(strcmpi(brlrData.Properties.VariableNames, "Velocity_DR"));
+    brlr_velcr_var = find(strcmpi(brlrData.Properties.VariableNames, "Velocity_CR"));
+
+    brhr_time_var = find(strcmpi(brhrData.Properties.VariableNames, "Flight_Time__s_"));
+    brhr_accel_var = find(strcmpi(brhrData.Properties.VariableNames, "Accel_X"));
     
     % Check for the new required columns as well
-    if any([isempty(timeVar), isempty(altVar), isempty(velVar), isempty(accelVar), isempty(pressureVar), isempty(tempVar), isempty(balloonHeight_m), ...
-            isempty(balloonPressure_hPa), isempty(balloonTemp_C)] )
+    if any([isempty(timeVar), isempty(altVar), isempty(velVar), isempty(accelVar), isempty(pressureVar), isempty(tempVar), isempty(balloonHeight_m_var), ...
+            isempty(balloonPressure_hPa_var), isempty(balloonTemp_C_var), isempty(fwgpsALT_Var), isempty(fwgpsHORZV_Var), isempty(fwgpsVERTV_Var)] )
         error('Could not automatically detect required columns in the CSV file(s). Please check column headers.');
     end
     
@@ -136,20 +179,24 @@ try
     velocity = telemegaData{:, velVar};
     acceleration = telemegaData{:, accelVar};
 
-    balloonAltitude = balloonData{:, balloonHeight_m}; %load balloon geopotential height (m)
-    balloonPressure = balloonData{:, balloonPressure_hPa}; % Load pressure data (hPa)
-    balloonTemperature = balloonData{:, balloonTemp_C}; % Load temperature data (C)
+    balloonAltitude = balloonData{:, balloonHeight_m_var}; %load balloon geopotential height (m)
+    balloonPressure = balloonData{:, balloonPressure_hPa_var}; % Load pressure data (hPa)
+    balloonTemperature = balloonData{:, balloonTemp_C_var}; % Load temperature data (C)
     
-    % --- Apply unit conversion if necessary ---
-    % This is a critical step. If data is in feet and not converted, the
-    % v^2 term in the drag equation will be ~10.7x too large, making the
-    % calculated Cd ~10.7x too small.
-    if unit_conversion_factor ~= 1.0
-        altitude = altitude * unit_conversion_factor;
-        velocity = velocity * unit_conversion_factor;
-        acceleration = acceleration * unit_conversion_factor;
-    end
-    
+    fwgpsALT = fwgpsData{:, fwgpsALT_Var} ./ 3.281;
+    fwgpsHORZV = fwgpsData{:, fwgpsHORZV_Var} ./ 3.281;
+    fwgpsVERTV = fwgpsData{:, fwgpsVERTV_Var} ./ 3.281;
+
+    brlr_time = brlrData{:, brlr_time_var};
+    brlr_alt = brlrData{:, brlr_alt_var} ./ 3.281;
+
+    brlr_velup = brlrData{:, brlr_velup_var} ./ 3.281;
+    brlr_veldr = brlrData{:, brlr_veldr_var} ./ 3.281;
+    brlr_velcr = brlrData{:, brlr_velcr_var} ./ 3.281;
+
+    brhr_time = brhrData{:, brhr_time_var};
+    brhr_accel = brhrData{:, brhr_accel_var} .* -9.81;
+
 catch ME
     fprintf('Error reading or processing the file: %s\n', ME.message);
     return;
@@ -223,13 +270,24 @@ mach_values = [];
 % Loop through each data point in the coast phase
 for i = 1:length(time_coast)
     % Get instantaneous values
-    h = alt_coast(i);
+    h = alt_coast(i); %scales baro alt to gps alt
     v = vel_coast(i);
     a = accel_coast_smoothed(i); % Use the smoothed accelerometer value
     
+    brlrIndex = find(brlr_alt * 1.054 >= h, 1, "first");
+    brhrIndex = find(brhr_time >= brlr_time(brlrIndex), 1, "first");
+    accelBR = brhr_accel(brhrIndex);
+
+    totvelBR = (brlr_velup(brlrIndex));
 
     balloonIndex = find(balloonAltitude >= h, 1, "first"); %finds the location where the balloon data lines up with rocket data
     p = balloonPressure(balloonIndex) * 100;
+
+    fwgpsIndex = find(fwgpsALT >= h, 1, "first");
+    vvel = fwgpsVERTV(fwgpsIndex);
+    hvel = fwgpsHORZV(fwgpsIndex);
+    v = ((vvel ^ 2) + (hvel ^ 2)) ^ (1/2);
+
     % Avoid calculations when velocity is near zero (at apogee) to prevent
     % division by zero and nonsensical Cd values.
     if v < 10 % m/s threshold
@@ -253,7 +311,7 @@ for i = 1:length(time_coast)
     % Therefore, F_drag = m * a_proper.
     % Since drag opposes motion (v is positive, a is negative), the
     % magnitude of the drag force is -m*a.
-    F_drag = (-m * (a));
+    F_drag = (-m * (accelBR));
     DragForce = [DragForce; F_drag / 4.448]; % not plotted, just saved as drag force in lbf
     % We only care about positive drag force values
     if F_drag <= 0
@@ -262,7 +320,7 @@ for i = 1:length(time_coast)
     
     % Step C: Calculate the Coefficient of Drag (Cd)
     % F_drag = 0.5 * rho * v^2 * A * Cd
-    Cd = (2 * F_drag) / (rho * v^2 * A);
+    Cd = (2 * F_drag) / (rho * totvelBR^2 * A);
 
     % Store valid results
     
@@ -333,6 +391,24 @@ grid on;
 legend('show');
 ylim([0, 0.7]); % Set a reasonable y-axis limit
 
+subplot(3, 2, 5);
+scatter(fwgpsALT, fwgpsHORZV, 20, 'b', 'filled', 'DisplayName', 'HORZV vs ALT');
+hold on;
+title('HORZV vs ALT');
+xlabel('ALT');
+ylabel('HORZV');
+grid on;
+legend('show');
+
+subplot(3, 2, 6);
+scatter(fwgpsALT, fwgpsVERTV, 20, 'b', 'filled', 'DisplayName', 'VERTV vs ALT');
+hold on;
+title('VERTV vs ALT');
+xlabel('ALT');
+ylabel('VERTV');
+grid on;
+legend('show');
+
 % subplot(3, 2, 5);
 % plot(time_coast, DragForce, 'LineWidth', 1.5);
 % hold on;
@@ -344,14 +420,14 @@ ylim([0, 0.7]); % Set a reasonable y-axis limit
 % grid on;
 % legend('Drag Force', 'Location', 'northwest');
 
-
-function T_k = calculate_isa_temperature(altitude)
-    % Calculates temperature (in Kelvin) based on the International 
-    % Standard Atmosphere model for a given altitude (in meters).
-    
-    T0 = 288.15;  % Sea level standard temperature (Kelvin)
-    L = -0.0065;  % Temperature lapse rate (K/m) in the troposphere
-    
-    % ISA formula for temperature in the troposphere (up to 11km)
-    T_k = T0 + L * altitude;
-end
+% 
+% function T_k = calculate_isa_temperature(altitude)
+%     % Calculates temperature (in Kelvin) based on the International 
+%     % Standard Atmosphere model for a given altitude (in meters).
+% 
+%     T0 = 288.15;  % Sea level standard temperature (Kelvin)
+%     L = -0.0065;  % Temperature lapse rate (K/m) in the troposphere
+% 
+%     % ISA formula for temperature in the troposphere (up to 11km)
+%     T_k = T0 + L * altitude;
+% end
