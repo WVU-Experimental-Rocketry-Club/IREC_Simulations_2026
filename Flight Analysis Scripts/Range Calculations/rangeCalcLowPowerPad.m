@@ -2,13 +2,13 @@ mw_tx = 25;
 dbm_tx = 10 * log10(mw_tx);
 P_TX = dbm_tx; %tx power. 100mw = 20, 400mw=26, 500mw = 27, 1w = 30 dBm, 2w = 33 dBm
 TX_efficiency = 0.95;
-G_TX = 2.1; %tx gain (9.3 dbi triple feed, hpbw 55 deg 6.3 dbi)
-G_RX = 2.1; % rx gain (5.8 dbi mx air, 11 dbi maple, 
+G_TX = 2.8; %tx gain (9.3 dbi triple feed, hpbw 55 deg 6.3 dbi)
+G_RX = 2.8; % rx gain (5.8 dbi mx air, 11 dbi maple, 
 S_RX = -90; %sensitivity dBm
 
 f_MHz = 5800; % freq mhz
 lambda = 3e8 / (f_MHz * 10^6);
-alpha = 2.5; %free space exponent
+alpha = 2; %free space exponent, 2 is perfect, 3-4 for urban & indoor
 
 LM = 3; %link margin
 

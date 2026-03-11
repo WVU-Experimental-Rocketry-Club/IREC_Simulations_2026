@@ -9,9 +9,9 @@
 
 % 1. Filename of your telemetry CSV file.
 %    Assumes the file is in the same directory as this script.
-filename = 'onboard flight data.csv';
-%filename = 'sSunset_telemega_03292025_1.csv';
-%filename = 'AppSunset6674FullTelem.csv';
+filename = 'Old Flight Data\sSunset_telemega_06112025.csv';
+%filename = 'Old Flight Data\sSunset_telemega_03292025_1.csv';
+%filename = 'Old Flight Data\AppSunset6674FullTelem.csv';
 
 
 % 2. Assumed column headers in your CSV file.
@@ -32,22 +32,22 @@ rocket_diameter_m = 0.158242; % Diameter of the rocket (for drag calculation)
 drag_data_table = [
     0.0 * 343, 0.6;
     0.1 * 343, 0.55;
-    0.2 * 343, 0.46;
-    0.3 * 343, 0.42;
-    0.4 * 343, 0.4;
-    0.5 * 343, 0.36;
-    0.6 * 343, 0.354;
-    0.7 * 343, 0.361;
-    0.8 * 343, 0.365;
-    0.9 * 343, 0.37;
-    0.97 * 343, 0.42;
-    0.993 * 343, 0.47;
-    1.0 * 343, 0.5;
-    1.02 * 343, 0.59
+    0.2 * 343, 0.43;
+    0.3 * 343, 0.43;
+    0.4 * 343, 0.43;
+    0.5 * 343, 0.43;
+    0.6 * 343, 0.43;
+    0.7 * 343, 0.43;
+    0.8 * 343, 0.43;
+    0.9 * 343, 0.43;
+    0.97 * 343, 0.5;
+    0.993 * 343, 0.57;
+    1.0 * 343, 0.57;
+    1.02 * 343, 0.57;
     1.1 * 343, 0.57;
-    1.2 * 343, 0.55;
-    1.3 * 343, 0.52;
-    1.4 * 343, 0.5;
+    1.2 * 343, 0.57;
+    1.3 * 343, 0.57;
+    1.4 * 343, 0.57;
     1.5 * 343, 0.48;
     1.6 * 343, 0.44;
     1.7 * 343, 0.44;
@@ -55,11 +55,37 @@ drag_data_table = [
     1.9 * 343, 0.44;
 ];
 
+drag_data_table = [
+    0.0 * 343, 0.6;
+    0.1 * 343, 0.55;
+    0.2 * 343, 0.42;
+    0.3 * 343, 0.42;
+    0.4 * 343, 0.42;
+    0.5 * 343, 0.42;
+    0.6 * 343, 0.42;
+    0.7 * 343, 0.42;
+    0.8 * 343, 0.42;
+    0.9 * 343, 0.42;
+    0.97 * 343, 0.479;
+    0.993 * 343, 0.496;
+    1.0 * 343, 0.504;
+    1.05 * 343, 0.546;
+    1.1 * 343, 0.54;
+    1.2 * 343, 0.535;
+    1.3 * 343, 0.53;
+    1.4 * 343, 0.525;
+    1.5 * 343, 0.52;
+    1.6 * 343, 0.515;
+    1.7 * 343, 0.51;
+    1.8 * 343, 0.505;
+    1.9 * 343, 0.5;
+];
+
 % 5. Motor burn time.
 %    Enter the duration of the motor burn in seconds. This is a more
 %    reliable way to define the burn period than relying on acceleration
 %    alone, as drag can exceed thrust.
-motor_burn_time_s = 9.3;
+motor_burn_time_s = 9.6;
 
 
 % =========================================================================
@@ -120,7 +146,7 @@ try
     % =====================================================================
     % 2. MODELING DRAG FORCE
     % =====================================================================
-    rho = pressure(burn_indices) / (287.058 * 310.15);
+    rho = pressure(burn_indices) / (287.058 * 310.15); % rho = P/(R*T)
 
     A = pi * (rocket_diameter_m / 2)^2;
     
@@ -139,10 +165,10 @@ try
     % $F_{net} = T - F_{drag} - F_{gravity}$
     % Therefore, $T = F_{net} + F_{drag} + F_{gravity}$
     
-    net_force = current_mass .* acceleration(burn_indices);
+    net_force = current_mass .* (acceleration(burn_indices));
     gravity_force = current_mass * g;
     
-    thrust = net_force + drag_force + gravity_force;
+    thrust = net_force + drag_force;
     
     % =====================================================================
     % 4. PLOTTING THE THRUST CURVE
@@ -201,7 +227,7 @@ try
     for i = 1:length(time_burn)
         fprintf(fid, '%.4f %.4f\n', time_burn(i) - time_burn(1), thrust(i));
     end
-    
+    fprintf(fid, '%.4f %.4f\n', time_burn(length(time_burn)), 0);
     % Close the file.
     fclose(fid);
     

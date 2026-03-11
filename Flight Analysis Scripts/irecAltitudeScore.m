@@ -1,6 +1,6 @@
 targetApo = 30000;
 baroApo = linspace(21000, 39000, 1000);
-gpsApo = baroApo + 1500;
+gpsApo = baroApo + 1200;
 
 
 pointsLost = ( 350 / (0.3 * targetApo) ) * (abs(targetApo - baroApo));
