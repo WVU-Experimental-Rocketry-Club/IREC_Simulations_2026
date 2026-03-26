@@ -1,6 +1,6 @@
 % calculator to figure out what pressure you need to hit in order to have the
 % altimeter read your desired altitude agl
-launchSiteMSL_baro = 864; % meters MSL that the baro will read at launchpad. 864m baro s.sunrise, 894 gps
+launchSiteMSL_baro = 365.76; % meters MSL that the baro will read at launchpad. 864m baro s.sunrise, 894 gps
 desiredAGL = 9144; % 9144m = 30,000 ft
 desiredHeight = desiredAGL + launchSiteMSL_baro;
 
