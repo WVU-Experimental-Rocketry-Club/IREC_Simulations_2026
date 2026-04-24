@@ -3,8 +3,8 @@ dbm_tx = 10 * log10(mw_tx);
 
 P_TX = dbm_tx; %tx power. 100mw = 20, 400mw=26, 500mw = 27, 1w = 30 dBm, 2w = 33 dBm
 TX_efficiency = 0.95;
-G_TX = 2.8; %tx gain (9.3 dbi triple feed, hpbw 55 deg 6.3 dbi)
-G_RX = 12; % rx gain (5.8 dbi mx air, 11 dbi maple, 
+G_TX = 1.9; %tx gain (9.3 dbi triple feed, hpbw 55 deg 6.3 dbi)
+G_RX = 12.2; % rx gain (5.8 dbi mx air, 11 dbi maple, 
 S_RX = -80; %sensitivity dBm
 
 f_MHz = 5800; % freq mhz
