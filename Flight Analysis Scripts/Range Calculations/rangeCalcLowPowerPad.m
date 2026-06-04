@@ -1,15 +1,15 @@
-mw_tx = 1000;
+mw_tx = 450;
 dbm_tx = 10 * log10(mw_tx);
 
 P_TX = dbm_tx; %tx power. 100mw = 20, 400mw=26, 500mw = 27, 1w = 30 dBm, 2w = 33 dBm
 TX_efficiency = 0.95;
-G_TX = 1.9; %tx gain (9.3 dbi triple feed, hpbw 55 deg 6.3 dbi)
-G_RX = 12; % rx gain (5.8 dbi mx air, 11 dbi maple, 
+G_TX = 7; %tx gain (9.3 dbi triple feed, hpbw 55 deg 6.3 dbi)
+G_RX = 13; % rx gain (5.8 dbi mx air, 11 dbi maple, 
 S_RX = -85; %sensitivity dBm
 
 f_MHz = 5800; % freq mhz
 lambda = 3e8 / (f_MHz * 10^6);
-alpha = 2; %free space exponent, 2 is perfect conditions, 3-4 for urban & indoor
+alpha = 2.05; %free space exponent, 2 is perfect conditions, 3-4 for urban & indoor
 
 LM = 0; %link margin, think of it as "breathing room" on top of necessary communications
 
